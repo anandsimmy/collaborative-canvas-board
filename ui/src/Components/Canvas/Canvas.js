@@ -1,52 +1,87 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import io from 'socket.io-client';
 import './Canvas.css';
 
 const Canvas = () => {
 
-    const [color, setColor] = useState('green');
+    const { current: canvasDetails } = useRef({ color: 'green' });
+
+    const changeColor = (newColor) => {
+        canvasDetails.color = newColor;
+    }
+
+    useEffect(() => {
+        canvasDetails.socket = io.connect('http://192.168.1.4:5000', () => {
+            console.log('connecting to server')
+        })
+        canvasDetails.socket.on('image-data', (data) => {
+            const image = new Image()
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+            image.src = data;
+            image.addEventListener('load', () => {
+                context.drawImage(image, 0, 0);
+            });
+        })
+    }, []);
     
     useEffect(() => {
-        const mouseMoveHandler = (e) => findxy('move', e)
-        const mouseDownHandler = (e) => findxy('down', e)
-        const mouseUpHandler = (e) => findxy('up', e)
+        const mouseMoveHandler = (e, type) => {
+            const event = type === 'touch' ? e.touches[0] : e;
+            findxy('move', event)
+        }
+        const mouseDownHandler = (e, type) => {
+            const event = type === 'touch' ? e.touches[0] : e;
+            findxy('down', event);
+            console.log(event)
+        }
+        const mouseUpHandler = (e, type) => {
+            const event = type === 'touch' ? e.touches[0] : e;
+            findxy('up', event)
+        }
         
-        let prevX = 0, currX = 0, prevY = 0, currY = 0, flag= false, dot_flag= false;
+        let prevX = 0, currX = 0, prevY = 0, currY = 0, flag = false;
 
         const canvas = document.getElementById('canvas');
+        canvas.height = window.innerHeight - 30;
+        canvas.width = window.innerWidth;
         const context = canvas.getContext('2d');
-        canvas.addEventListener("mousemove", mouseMoveHandler);
-        canvas.addEventListener("mousedown", mouseDownHandler);
-        canvas.addEventListener("mouseup", mouseUpHandler);
+
+        const onSave = () => {
+            if (!canvasDetails.waiting) {
+                const base64EncodedUrl = canvas.toDataURL('image/png')
+                canvasDetails.socket.emit('image-data', base64EncodedUrl);
+                canvasDetails.waiting = true;
+                setTimeout(() => {
+                    canvasDetails.waiting = false;
+                }, 100);
+            }
+        }
     
-        const draw= (e) => {
-        console.log(currY, e)
+        const draw = (e) => {
+
+        // START- DRAW
         context.beginPath();
         context.moveTo(prevX, prevY);
         context.lineTo(currX, currY);
-        context.strokeStyle = color;
+        context.strokeStyle = canvasDetails.color;
         context.lineCap = 'round';
         context.lineJoin = 'round';
         context.lineWidth = 2;
         context.stroke();
         context.closePath();
+        // END- DRAW
+        
+        onSave();
     }
     
-    function findxy(res, e) {
+    const findxy= (res, e) => {
         if (res === 'down') {
-            prevX = canvas.offsetLeft;
-            prevY = canvas.offsetTop;
+            prevX = currX;
+            prevY = currY;
             currX = e.clientX - canvas.offsetLeft;
             currY = e.clientY - canvas.offsetTop;
-    
             flag = true;
-            dot_flag = true;
-            if (dot_flag) {
-                context.beginPath();
-                context.fillStyle = color;
-                context.fillRect(currX, currY, 2, 2);
-                context.closePath();
-                dot_flag = false;
-            }
         }
         if (res === 'up' || res === "out") {
             flag = false;
@@ -62,23 +97,33 @@ const Canvas = () => {
         }
     }
         
+    canvas.addEventListener("mousemove", mouseMoveHandler);
+    canvas.addEventListener("mousedown", mouseDownHandler);
+    canvas.addEventListener("mouseup", mouseUpHandler);
+    canvas.addEventListener("touchmove", (e) => mouseMoveHandler(e, 'touch'));
+    canvas.addEventListener("touchstart", (e) => mouseDownHandler(e, 'touch'));
+    canvas.addEventListener("touchend", (e) => mouseUpHandler(e, 'touch'));
+    canvas.addEventListener("dblclick", onSave);
+        
     return () => {
         canvas.removeEventListener("mousemove", mouseMoveHandler);
         canvas.removeEventListener("mousedown", mouseDownHandler);
         canvas.removeEventListener("mouseup", mouseUpHandler);
+        canvas.removeEventListener("dblclick", onSave);
     }
-}, [color])
+    }, [])
 
     return (
         <div className='canvas-wrapper'>
-            <input
-                className='color-picker'
-                type='color'
-                defaultValue='#00FF00'
-                style={{backgroundColor: color}}
-                onChange={(e) => setColor(e.target.value)}
-            />
-            <canvas className='canvas' id='canvas' height='700px' width='1400px'></canvas>
+            <div className='color-picker-wrapper'>
+                <input
+                    className='color-picker'
+                    type='color'
+                    defaultValue='#00FF00'
+                    onChange={(e) => changeColor(e.target.value)}
+                />
+            </div>
+            <canvas className='canvas' id='canvas'></canvas>
         </div>
     )
 

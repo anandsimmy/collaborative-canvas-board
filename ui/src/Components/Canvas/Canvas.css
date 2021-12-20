@@ -6,6 +6,10 @@
     align-items: center;
 }
 
+.color-picker-wrapper {
+    align-self: flex-start;
+}
+
 .color-picker {
     cursor: pointer;
     border-radius: 4px;
@@ -13,6 +17,7 @@
 	border: 2px solid antiquewhite;
     height: 30px;
     width: 70px;
+    margin-left: 18px;
 }
 
 .color-picker::-webkit-color-swatch-wrapper {
