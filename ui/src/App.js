@@ -1,10 +1,11 @@
-import Canvas from './Components/Canvas/Canvas';
+import React from 'react';
+import PaintingBoard from './Components/PaintingBoard/PaintingBoard';
 import './App.css';
 
 function App() {
   return (
     <div className="App">
-      <Canvas />
+      <PaintingBoard />
     </div>
   );
 }
