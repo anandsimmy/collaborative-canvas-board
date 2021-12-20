@@ -1,0 +1,27 @@
+.canvas-wrapper {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.color-picker {
+    cursor: pointer;
+    border-radius: 4px;
+    -webkit-appearance: none;
+	border: 2px solid antiquewhite;
+    height: 30px;
+    width: 70px;
+}
+
+.color-picker::-webkit-color-swatch-wrapper {
+	padding: 0;
+}
+.color-picker::-webkit-color-swatch {
+	border: none;
+}
+
+.canvas {
+    background-color: white;
+}
