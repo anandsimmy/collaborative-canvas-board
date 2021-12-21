@@ -1,10 +1,12 @@
-const expressApp = require('express')();
-const httpServer = require('http').createServer(expressApp)
+const path = require('path');
+const express = require('express');
+const expressApp = express();
+const httpServer = require('http').createServer(expressApp);
 const io = require('socket.io')(httpServer, {
     cors: { origin: true }
 })
 
-app.use(express.static(path.join(__dirname, '/ui/build')));
+expressApp.use(express.static(path.join(__dirname, '/ui/build')));
 
 const port = process.env.PORT || 5000;
 
