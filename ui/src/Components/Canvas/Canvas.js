@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 import './Canvas.css';
 
@@ -11,7 +11,7 @@ const Canvas = () => {
     }
 
     useEffect(() => {
-        canvasDetails.socket = io.connect('http://localhost:5000', () => {
+        canvasDetails.socket = io.connect('/', () => {
             console.log('connecting to server')
         })
         canvasDetails.socket.on('image-data', (data) => {
