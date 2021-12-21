@@ -4,6 +4,8 @@ const io = require('socket.io')(httpServer, {
     cors: { origin: true }
 })
 
+app.use(express.static(path.join(__dirname, '/ui/build')));
+
 const port = process.env.PORT || 5000;
 
 io.on('connection', (socket) => {
