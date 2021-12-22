@@ -6,7 +6,6 @@ const io = require('socket.io')(httpServer, {
     cors: { origin: true }
 })
 
-
 const port = process.env.PORT || 5000;
 
 io.on('connection', (socket) => {
@@ -16,11 +15,12 @@ io.on('connection', (socket) => {
     })
 })
 
+console.log('server env', process.env.NODE_ENV)
 expressApp.use(express.static(path.join(__dirname, '../ui/build')));
 expressApp.get('*', function (req, res) {
     console.log('response received');
     res.sendFile(path.join(__dirname, '../ui/build', 'index.html'));
-});
+});  
 
 httpServer.listen(port, () => {
     console.log('Server running at', port)
