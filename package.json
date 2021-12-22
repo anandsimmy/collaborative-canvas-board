@@ -4,11 +4,10 @@
   "description": "",
   "main": "./server/server.js",
   "scripts": {
-    "start": "node ./server/server.js",
+    "start": "NODE_ENV=prod && node ./server/server.js",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "client": "cd ./ui && npm start",
-    "server": "nodemon ./server/server.js",
-    "deploy": "cd ./client && npm run build && cd .. && git add . && git commit -m 'added new build' && git push"
+    "client": "NODE_ENV=dev && cd ./ui && npm start",
+    "server": "nodemon ./server/server.js"
   },
   "keywords": [],
   "author": "",
