@@ -4,14 +4,19 @@ import './Canvas.css';
 
 const Canvas = () => {
 
-    const { current: canvasDetails } = useRef({ color: 'green' });
+    const { current: canvasDetails } = useRef({ color: 'green', socketUrl: '/' });
 
     const changeColor = (newColor) => {
         canvasDetails.color = newColor;
     }
 
     useEffect(() => {
-        canvasDetails.socket = io.connect('/', () => {
+        console.log('client env', process.env.NODE_ENV)
+        if (process.env.NODE_ENV === 'development') {
+            canvasDetails.socketUrl= 'http://localhost:5000'
+        }
+        console.log('socketUrl', canvasDetails.socketUrl)
+        canvasDetails.socket = io.connect(canvasDetails.socketUrl, () => {
             console.log('connecting to server')
         })
         canvasDetails.socket.on('image-data', (data) => {
@@ -33,7 +38,6 @@ const Canvas = () => {
         const mouseDownHandler = (e, type) => {
             const event = type === 'touch' ? e.touches[0] : e;
             findxy('down', event);
-            console.log(event)
         }
         const mouseUpHandler = (e, type) => {
             const event = type === 'touch' ? e.touches[0] : e;
@@ -100,8 +104,8 @@ const Canvas = () => {
     canvas.addEventListener("mousemove", mouseMoveHandler);
     canvas.addEventListener("mousedown", mouseDownHandler);
     canvas.addEventListener("mouseup", mouseUpHandler);
-    canvas.addEventListener("touchmove", (e) => mouseMoveHandler(e, 'touch'));
-    canvas.addEventListener("touchstart", (e) => mouseDownHandler(e, 'touch'));
+    canvas.addEventListener("touchmove", (e) => mouseMoveHandler(e, 'touch'), { passive: true });
+    canvas.addEventListener("touchstart", (e) => mouseDownHandler(e, 'touch'), { passive: true });
     canvas.addEventListener("touchend", (e) => mouseUpHandler(e, 'touch'));
     canvas.addEventListener("dblclick", onSave);
         
